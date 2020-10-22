@@ -29,7 +29,7 @@ func (l *Lexer) Lex() []*Token {
 	var tokens []*Token
 	for {
 		switch l.Read() {
-		case ' ', '\n', '\t', 'v', '\r':
+		case ' ', '\n', '\t', '\v', '\r':
 			continue
 		case '+':
 			if l.Read() == '=' {
@@ -130,7 +130,7 @@ func (l *Lexer) Lex() []*Token {
 		case '?':
 			tokens = append(tokens, &Token{Type: IF})
 		case 0:
-			goto end
+			return tokens
 		default:
 			if IsLetter(l.ch) {
 				tokens = append(tokens, l.ReadIdentifier())
@@ -139,8 +139,6 @@ func (l *Lexer) Lex() []*Token {
 			}
 		}
 	}
-end:
-	return tokens
 }
 
 func (l *Lexer) ReadNumber() *Token {
