@@ -1,120 +1,121 @@
 package Lexer
 
 import (
+	"fmt"
 	. "../Token"
 )
 
 type Lexer struct {
 	input string
-	rPos  int
-	ch    byte
+	position  int
+	char  byte
 }
 
 func New(input string) *Lexer {
-	l := &Lexer{input: input}
-	return l
+	this := &Lexer{input: input}
+	return this
 }
 
-func (l *Lexer) Read() byte {
-	if l.rPos < len(l.input) {
-		l.ch = l.input[l.rPos]
-		l.rPos++
+func (this *Lexer) Read() byte {
+	if this.position < len(this.input) {
+		this.char = this.input[this.position]
+		this.position++
 	} else {
-		l.ch = 0
+		this.char = 0
 	}
-	return l.ch
+	return this.char
 }
 
-func (l *Lexer) Lex() []*Token {
+func (this *Lexer) Lex() []*Token {
 	var tokens []*Token
 	for {
-		switch l.Read() {
+		switch this.Read() {
 		case ' ', '\n', '\t', '\v', '\r':
 			continue
 		case '+':
-			if l.Read() == '=' {
+			if this.Read() == '=' {
 				tokens = append(tokens, &Token{Type: ADDa})
 			} else {
-				l.rPos--
+				this.position--
 				tokens = append(tokens, &Token{Type: ADD})
 			}
 		case '-':
-			if l.Read() == '=' {
+			if this.Read() == '=' {
 				tokens = append(tokens, &Token{Type: SUBa})
-			} else if l.ch == '>' {
+			} else if this.char == '>' {
 				tokens = append(tokens, &Token{Type: THEN})
 			} else {
-				l.rPos--
+				this.position--
 				tokens = append(tokens, &Token{Type: SUB})
 			}
 		case '*':
-			if l.Read() == '=' {
+			if this.Read() == '=' {
 				tokens = append(tokens, &Token{Type: MULa})
 			} else {
-				l.rPos--
+				this.position--
 				tokens = append(tokens, &Token{Type: MUL})
 			}
 		case '/':
-			if l.Read() == '=' {
+			if this.Read() == '=' {
 				tokens = append(tokens, &Token{Type: DIVa})
 			} else {
-				l.rPos--
+				this.position--
 				tokens = append(tokens, &Token{Type: DIV})
 			}
 		case '%':
-			if l.Read() == '=' {
+			if this.Read() == '=' {
 				tokens = append(tokens, &Token{Type: MODa})
 			} else {
-				l.rPos--
+				this.position--
 				tokens = append(tokens, &Token{Type: MOD})
 			}
 		case '^':
-			if l.Read() == '=' {
+			if this.Read() == '=' {
 				tokens = append(tokens, &Token{Type: POWa})
 			} else {
-				l.rPos--
+				this.position--
 				tokens = append(tokens, &Token{Type: POW})
 			}
 		case '=':
-			if l.Read() == '=' {
+			if this.Read() == '=' {
 				tokens = append(tokens, &Token{Type: EQU})
 			} else {
-				l.rPos--
-				tokens = append(tokens, &Token{Type: ASS})
+				this.position--
+				tokens = append(tokens, &Token{Type: ASS}) // ♂ stick finger in my ASS ♂
 			}
 		case '>':
-			if l.Read() == '=' {
+			if this.Read() == '=' {
 				tokens = append(tokens, &Token{Type: LARe})
 			} else {
-				l.rPos--
+				this.position--
 				tokens = append(tokens, &Token{Type: LAR})
 			}
 		case '<':
-			if l.Read() == '=' {
+			if this.Read() == '=' {
 				tokens = append(tokens, &Token{Type: LESe})
 			} else {
-				l.rPos--
+				this.position--
 				tokens = append(tokens, &Token{Type: LES})
 			}
 		case '!':
-			if l.Read() == '=' {
+			if this.Read() == '=' {
 				tokens = append(tokens, &Token{Type: NOTe})
 			} else {
-				l.rPos--
+				this.position--
 				tokens = append(tokens, &Token{Type: NOT})
 			}
 		case '&':
-			if l.Read() == '&' {
+			if this.Read() == '&' {
 				tokens = append(tokens, &Token{Type: AND})
 			} else {
-				l.rPos--
+				this.position--
 				//tokens = append(tokens, &Token{Type: BitAND})
 			}
 		case '|':
-			if l.Read() == '|' {
+			if this.Read() == '|' {
 				tokens = append(tokens, &Token{Type: OR})
 			} else {
-				l.rPos--
+				this.position--
 				//tokens = append(tokens, &Token{Type: BitOR})
 			}
 		case '(':
@@ -129,58 +130,70 @@ func (l *Lexer) Lex() []*Token {
 			tokens = append(tokens, &Token{Type: COLON})
 		case '?':
 			tokens = append(tokens, &Token{Type: IF})
+		case '\'', '"':
+			tokens = append(tokens, this.ReadString(this.char));
 		case 0:
 			return tokens
 		default:
-			if IsLetter(l.ch) {
-				tokens = append(tokens, l.ReadIdentifier())
-			} else if IsDigit(l.ch) {
-				tokens = append(tokens, l.ReadNumber())
+			if IsLetter(this.char) {
+				tokens = append(tokens, this.ReadIdentifier())
+			} else if IsDigit(this.char) {
+				tokens = append(tokens, this.ReadNumber())
 			}
 		}
 	}
 }
 
-func (l *Lexer) ReadNumber() *Token {
-	t := new(Token)
-	retPos := l.rPos
-	t.Type = INT
+func (this *Lexer) ReadNumber() *Token {
+	token := &Token{Type: INT}
+	retPos := this.position
 loop:
-	for IsDigit(l.ch) {
-		t.Val += string(l.ch)
-		retPos = l.rPos
-		l.Read()
+	for IsDigit(this.char) {
+		token.Value += string(this.char)
+		retPos = this.position
+		this.Read()
 	}
-	if l.ch == '.' {
-		if IsDigit(l.Read()) && t.Type != FLOAT {
-			t.Type = FLOAT
-			t.Val += "."
+	if this.char == '.' {
+		if IsDigit(this.Read()) && token.Type != FLOAT {
+			token.Type = FLOAT
+			token.Value += "."
 			goto loop
 		} else {
-			t.Type = ILLEGAL
+			token.Type = ILLEGAL
 		}
 	}
-	l.rPos = retPos
-	return t
+	this.position = retPos
+	return token
 }
 
-func (l *Lexer) ReadIdentifier() *Token {
-	t := new(Token)
-	retPos := l.rPos
-	t.Type = IDENT
-	for IsLetter(l.ch) || IsDigit(l.ch) {
-		t.Val += string(l.ch)
-		retPos = l.rPos
-		l.Read()
+func (this *Lexer) ReadIdentifier() *Token {
+	token := &Token{Type: IDENT}
+	retPos := this.position
+	for IsLetter(this.char) || IsDigit(this.char) {
+		token.Value += string(this.char)
+		retPos = this.position
+		this.Read()
 	}
-	l.rPos = retPos
-	return t
+	this.position = retPos
+	return token
 }
 
-func IsDigit(ch byte) bool {
-	return ch >= '0' && ch <= '9'
+func (this *Lexer) ReadString(start_char byte) *Token {
+	token := &Token{Type: STRING}
+	for this.Read() != start_char {
+		if this.char == 0 {
+			fmt.Println("Unexcepted EOF")
+			break
+		}
+		token.Value += string(this.char)
+	}
+	return token
 }
 
-func IsLetter(ch byte) bool {
-	return ch >= 'A' && ch <= 'Z' || ch >= 'a' && ch <= 'z' || ch == '_'
+func IsDigit(char byte) bool {
+	return char >= '0' && char <= '9'
+}
+
+func IsLetter(char byte) bool {
+	return char >= 'A' && char <= 'Z' || char >= 'a' && char <= 'z' || char == '_'
 }
