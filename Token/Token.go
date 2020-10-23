@@ -3,7 +3,7 @@ package Token
 type (
 	Token struct {
 		Type int
-		Val  string
+		Value  string
 	}
 )
 
@@ -49,4 +49,5 @@ const (
 
 	THEN // ->
 	IF   // ?
+	STRING
 )
