@@ -1,17 +1,17 @@
 package main
 
 import (
-	"fmt"
+	"os"
 
-	"./Lexer"
+	"./Repl"
 )
 
 func main() {
-	l := Lexer.New("3.14*2==t")
-	fmt.Println("Result: ")
-	a := l.Lex()
-	fmt.Println(len(a))
-	for _, el := range a {
-		fmt.Println(el)
+	if len(os.Args) > 1 {
+		Repl.ReadFile(os.Args[1])
+		return
 	}
+
+	Repl.Start(os.Stdin, os.Stdout)
+
 }
