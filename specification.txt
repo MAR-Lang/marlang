@@ -30,6 +30,6 @@ Variables:
 Functions:
 	<type> <name>(<args>) {
 		<body>
-	} - procedure definition
+	} - function definition
 	
 	<name>(<args>) - call function
