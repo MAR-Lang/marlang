@@ -32,4 +32,4 @@ Functions:
 		<body>
 	} - procedure definition
 	
-	<name>(<args>) - call procedure
+	<name>(<args>) - call function
