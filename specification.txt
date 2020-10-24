@@ -16,6 +16,8 @@ boolean operators:
 	> - large
 	< - less
 	! - not
+	&& - and
+	|| - or
 	
 Data type:
 	$<size>.<size> - type
