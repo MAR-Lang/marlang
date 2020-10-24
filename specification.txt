@@ -26,10 +26,10 @@ Variables:
 	<type> <name> - declaration
 	<type> <name> -> <value> - declaration & initialization
 	<name> -> <value> - declaration & initialization with implicit type definition
-	
-Procedure:
-	<name> {
+
+Functions:
+	<type> <name>(<args>) {
 		<body>
 	} - procedure definition
 	
-	@<name> - call procedure
+	<name>(<args>) - call procedure
