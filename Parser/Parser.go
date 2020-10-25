@@ -34,13 +34,11 @@ func (this *TokenStream) Move() *IToken {
 	}
 }
 
-// Node - struct containing all da shit
 type Node struct {
 	name int
+	// true if node is statment otherwise node is expression
 	_type bool
-	body []*Node
-	symbolName string
-	stringBody string
+	body *interface {}
 }
 
 
