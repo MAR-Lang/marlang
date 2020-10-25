@@ -37,18 +37,46 @@ func (this *TokenStream) Move() *IToken {
 
 // Node - struct containing all da shit
 type Node struct {
-	name int
-	_type bool
-	body []*Node
+	name       int
+	_type      bool
+	body       []*Node
 	symbolName string
 	stringBody string
+	parent     *Node
 }
 
+func (this *Node) AddChild(node *Node) {
+	node.parent = this
+	this.body = append(this.body, node)
+}
 
+func (this *Node) RemoveChild(index int) *Node {
+	node := this.body[index]
+	for i := index; i < len(this.body)-1; i++ {
+		this.body[i] = this.body[i+1]
+	}
+	this.body = this.body[:len(this.body)-1]
+	return node
+}
+
+func (this *Node) GetChildern() []*Node {
+	return this.body
+}
+
+func (this *Node) GetChild(index int) *Node {
+	if len(this.body) <= index {
+		return nil
+	}
+	return this.body[index]
+}
+
+func (this *Node) GetParent() *Node {
+	return this.parent
+}
 
 func Parse(tokens []*IToken) *Node {
 	stream = CreateStream(tokens)
-	__top_level_node = &Node{name: NodeBody, _type: true}
+	__top_level_node = &Node{name: NodeBody, _type: true, parent: nil}
 
 	return __top_level_node
 }
