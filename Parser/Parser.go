@@ -73,7 +73,7 @@ func (this *Node) RemoveChild(index int) *Node {
 	return node
 }
 
-func (this *Node) GetChildern() []*Node {
+func (this *Node) GetChildren() []*Node {
 	return this.children
 }
 
@@ -98,47 +98,62 @@ func Parse(tokens []*IToken) *Node {
 			break
 		}
 
-		if currentToken.Type == Token.INT || currentToken.Type == Token.FLOAT {
-			var node *Node
-			switch stream.next.Type {
-			case Token.ADD:
-				node = &Node{name: ADD, _type: true}
-			case Token.SUB:
-				node = &Node{name: SUB, _type: true}
-			case Token.MUL:
-				node = &Node{name: MUL, _type: true}
-			case Token.DIV:
-				node = &Node{name: DIV, _type: true}
-			case Token.MOD:
-				node = &Node{name: MOD, _type: true}
-			case Token.POW:
-				node = &Node{name: POW, _type: true}
-			}
-			operand := stream.tokens[stream.index+1]
-			if operand.Type != currentToken.Type {
-				panic("Invalid type")
-			}
-			firstOperandNode := &Node{_type: false}
-			secondOperandNode := &Node{_type: false}
-			if currentToken.Type == Token.FLOAT {
-				firstOperandNode.name = FLOAT
-				secondOperandNode.name = FLOAT
-				firstOperandNode.body, _ = strconv.ParseFloat(currentToken.Value, 64)
-				secondOperandNode.body, _ = strconv.ParseFloat(operand.Value, 64)
-			} else {
-				firstOperandNode.name = INT
-				secondOperandNode.name = INT
-				firstOperandNode.body, _ = strconv.ParseInt(currentToken.Value, 10, 64)
-				secondOperandNode.body, _ = strconv.ParseInt(operand.Value, 10, 64)
-			}
-			node.AddChild(firstOperandNode)
-			node.AddChild(secondOperandNode)
+		if IsNumder(currentToken) {
+			if IsArithmeticOperator(stream.next) {
+				node := &Node{_type: true}
+				switch stream.next.Type {
+				case Token.ADD:
+					node.name = ADD
+				case Token.SUB:
+					node.name = SUB
+				case Token.MUL:
+					node.name = MUL
+				case Token.DIV:
+					node.name = DIV
+				case Token.MOD:
+					node.name = MOD
+				case Token.POW:
+					node.name = POW
+				}
+				operand := stream.tokens[stream.index+1]
+				if operand.Type != currentToken.Type {
+					panic("Invalid type")
+				}
+				firstOperandNode := &Node{_type: false}
+				secondOperandNode := &Node{_type: false}
+				if currentToken.Type == Token.FLOAT {
+					firstOperandNode.name = FLOAT
+					secondOperandNode.name = FLOAT
+					firstOperandNode.body, _ = strconv.ParseFloat(currentToken.Value, 64)
+					secondOperandNode.body, _ = strconv.ParseFloat(operand.Value, 64)
+				} else {
+					firstOperandNode.name = INT
+					secondOperandNode.name = INT
+					firstOperandNode.body, _ = strconv.ParseInt(currentToken.Value, 10, 64)
+					secondOperandNode.body, _ = strconv.ParseInt(operand.Value, 10, 64)
+				}
+				node.AddChild(firstOperandNode)
+				node.AddChild(secondOperandNode)
 
-			// will change in future
-			__top_level_node.AddChild(node)
-			stream.index += 2
+				// will change in future
+				__top_level_node.AddChild(node)
+				stream.index += 2
+			}
 		}
 	}
 
 	return __top_level_node
+}
+
+func IsNumder(token *IToken) bool {
+	return token.Type == Token.INT || token.Type == Token.FLOAT
+}
+
+func IsArithmeticOperator(token *IToken) bool {
+	return token.Type == Token.ADD ||
+		token.Type == Token.SUB ||
+		token.Type == Token.MUL ||
+		token.Type == Token.DIV ||
+		token.Type == Token.MOD ||
+		token.Type == Token.POW
 }
