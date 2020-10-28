@@ -31,8 +31,7 @@ type TokenStream struct {
 }
 
 func CreateStream(tokens []*IToken) *TokenStream {
-	stream := &TokenStream{index: 0, tokens: tokens}
-	return stream
+	return &TokenStream{index: 0, tokens: tokens}
 }
 
 func (this *TokenStream) Move() *IToken {
@@ -50,7 +49,6 @@ func (this *TokenStream) Move() *IToken {
 	}
 }
 
-// Node - struct containing all da shit
 type Node struct {
 	name     int
 	_type    bool
